@@ -11,7 +11,7 @@ parser.add_argument('--ttl', help='Enter the domain ttl', type=int, default=600)
 
 required_arguments = parser.add_argument_group('required_arguments')
 
-required_arguments.add_argument('--authtoken', help='Enter Provider Token, For multiple tokens add them in comma seperated format', required=True)
+required_arguments.add_argument('--authtoken', help='Enter Provider Token, For multiple tokens add them in comma separated format', required=True)
 required_arguments.add_argument('--record', help='Domain record', required=True)
 required_arguments.add_argument('--points', help='Points to ip', required=True)
 user_args = parser.parse_args()
