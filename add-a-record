@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+
+import argparse
+import json
+import http.client
+
+parser = argparse.ArgumentParser(description='Update DNS Record')
+
+parser.add_argument('--domain', help='Key domain', default="sourceshift.org")
+parser.add_argument('--ttl', help='Enter the domain ttl', type=int, default=600)
+
+required_arguments = parser.add_argument_group('required_arguments')
+
+required_arguments.add_argument('--authtoken', help='Enter Provider Token, For multiple tokens add them in comma seperated format', required=True)
+required_arguments.add_argument('--record', help='Domain record', required=True)
+required_arguments.add_argument('--points', help='Points to ip', required=True)
+user_args = parser.parse_args()
+
+print("Validating the Domain")
+
+godaddy_connection = http.client.HTTPSConnection("api.godaddy.com")
+godaddy_headers = { "Authorization" : f"sso-key {user_args.authtoken}", "Content-Type": "application/json" }
+godaddy_connection.request("GET", f"/v1/domains/{user_args.domain}", headers=godaddy_headers)
+response = godaddy_connection.getresponse()
+domain_name_from_response = json.loads(response.read().decode("utf-8"))['domain']
+response.close()
+if domain_name_from_response == user_args.domain:
+    print("Domain name is correct")
+elif domain_name_from_response != user_args.domain:
+    raise Exception("Domain name is incorrect")
+
+
+print("Updating the Record")
+# Update the record
+godaddy_update_body=[
+        {
+            "data": user_args.points,
+            "type": "A",
+            "ttl": user_args.ttl
+        }
+    ]
+godaddy_connection.request("PUT", f"/v1/domains/{user_args.domain}/records/A/{user_args.record}", headers=godaddy_headers, body=json.dumps(godaddy_update_body))
+response = godaddy_connection.getresponse()
+print("Record Update Status", response.status, response.reason)
+response.close()
+
+print("Validating the Record")
+godaddy_connection.request("GET", f"/v1/domains/{user_args.domain}/records/A/{user_args.record}", headers=godaddy_headers)
+response = godaddy_connection.getresponse()
+dns_record = json.loads(response.read().decode("utf-8"))
+print("Record Update Status", dns_record)
+response.close()
+godaddy_connection.close()
+
+if dns_record[0]['data'] == user_args.points:
+    print("Record Updated Successfully")
+else:
+    raise Exception("Record not updated")
+
+print("Done")
