@@ -17,5 +17,8 @@ Currently `sourceshift.org` is pointing to godaddy.
     ```bash
     wget https://raw.githubusercontent.com/sourceshift/dns-controller/main/add-a-record
     chmod +x add-a-record
-    ./add-a-record --authtoken "$GODADDY_KEY:$GODADDY_SECRET" --record=cool.application --points=127.0.0.1
+    ./add-a-record \
+        --authtoken "$GODADDY_KEY:$GODADDY_SECRET" \
+        --record=cool.application \
+        --points=127.0.0.1
     ```
